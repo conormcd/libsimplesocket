@@ -1,0 +1,3 @@
+test:
+  override:
+    - SKIP_IPV6_TESTS=true make linux
