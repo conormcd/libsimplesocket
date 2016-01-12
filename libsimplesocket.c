@@ -1,4 +1,5 @@
 #include <arpa/inet.h>
+#include <sys/select.h>
 #include <unistd.h>
 
 #include "libsimplesocket.h"
@@ -73,4 +74,23 @@ int simple_socket_connect(const char* address, int port) {
     }
 
     return sock;
+}
+
+int simple_socket_select(int socket, int directions, long timeout_millis) {
+    struct timeval timeout;
+    fd_set fd;
+
+    timeout.tv_sec = timeout_millis / 1000;
+    timeout.tv_usec = (timeout_millis % 1000) * 1000;
+
+    FD_ZERO(&fd);
+    FD_SET(socket, &fd);
+
+    return select(
+            socket + 1,
+            ((directions & SIMPLE_SOCKET_SELECT_READ) ? &fd : NULL),
+            ((directions & SIMPLE_SOCKET_SELECT_WRITE) ? &fd : NULL),
+            ((directions & SIMPLE_SOCKET_SELECT_ERROR) ? &fd : NULL),
+            &timeout
+    );
 }
